@@ -1,5 +1,6 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Threading;
 using UnityEngine;
 using UnityEngine.AI;
 
@@ -50,9 +51,30 @@ public class Bot : MonoBehaviour
         Vector3 fleeVector = location - this.transform.position;
         agent.SetDestination(this.transform.position - fleeVector);
     }
+
+    Vector3 wanderTarget = Vector3.zero;
+    void Wander()
+    {
+        float wanderRadius = 10;
+        float wanderDistance = 10;
+        float wanderJitter = 1;
+
+        wanderTarget += new Vector3(Random.Range(-1, 1) * wanderJitter, 0, Random.Range(-1, 1) * wanderJitter);
+
+        wanderTarget.Normalize();
+        wanderTarget *= wanderRadius;
+
+        Vector3 targetLocal = wanderTarget + new Vector3(0, 0, wanderDistance);
+        Vector3 targetWorld = this.gameObject.transform.InverseTransformDirection(targetLocal);
+
+        Seek(targetWorld);
+
+    }
+
+    void Hide ()
     // Update is called once per frame
     void Update()
     {
-        Evade();
+        Wander();
     }
 }
