@@ -71,10 +71,60 @@ public class Bot : MonoBehaviour
 
     }
 
-    void Hide ()
+    void Hide()
+    {
+        float dist = Mathf.Infinity;
+        Vector3 chosenSpot = Vector3.zero;
+
+        for (int i = 0; i < World.Instance.GetHidindSpots().Length; i++)
+        {
+            Vector3 hideDir = World.Instance.GetHidindSpots()[i].transform.position - target.transform.position;
+            Vector3 hidePos = World.Instance.GetHidindSpots()[i].transform.position + hideDir.normalized * 10;
+
+            if (Vector3.Distance(this.transform.position, hidePos) < dist)
+            {
+                chosenSpot = hidePos;
+                dist = Vector3.Distance(this.transform.position, hidePos);
+            }
+        }
+
+        Seek(chosenSpot);
+
+    }
+
+
+    void CleverHide()
+    {
+        float dist = Mathf.Infinity;
+        Vector3 chosenSpot = Vector3.zero;
+        Vector3 chosenDir = Vector3.zero;
+        GameObject chosenGO = World.Instance.GetHidindSpots()[0]; 
+
+        for (int i = 0; i < World.Instance.GetHidindSpots().Length; i++)
+        {
+            Vector3 hideDir = World.Instance.GetHidindSpots()[i].transform.position - target.transform.position;
+            Vector3 hidePos = World.Instance.GetHidindSpots()[i].transform.position + hideDir.normalized * 10;
+
+            if (Vector3.Distance(this.transform.position, hidePos) < dist)
+            {
+                chosenSpot = hidePos;
+                chosenDir = hideDir;
+                chosenGO = World.Instance.GetHidindSpots()[i];
+                dist = Vector3.Distance(this.transform.position, hidePos);
+            }
+        }
+
+      Collider hideCol= chosenGO.GetComponent<Collider>();
+        Ray backRay = new Ray(chosenSpot, -chosenDir.normalized);
+        RaycastHit info;
+        float distance = 100;
+        hideCol.Raycast(backRay, out info, distance);
+
+        Seek(info.point + chosenDir.normalized * 5);
+    }
     // Update is called once per frame
     void Update()
     {
-        Wander();
+        CleverHide();
     }
 }
